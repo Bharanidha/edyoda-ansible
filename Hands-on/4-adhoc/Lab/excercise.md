@@ -7,7 +7,7 @@
     - APT
 - Command:
     * Centos/Redhat : ansible all -m yum -a "name=httpd state=present"
-    * Ubuntu        : ansible all -m apt -a "name=httpd state=present"
+    * Ubuntu        : ansible all -m apt -a "name=apache2 state=present"
 - Argument:
     - state
         * present - install package
