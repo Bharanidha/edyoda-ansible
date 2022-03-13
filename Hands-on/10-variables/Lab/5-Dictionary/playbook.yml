@@ -1,0 +1,24 @@
+# Dictionary
+---
+  - hosts: all
+    remote_user: vagrant
+    become: true
+    gather_facts: no
+    ignore_errors: yes
+    vars:
+      package:
+       apache: httpd
+       shell: zsh
+       ntp: ntpd
+       python: python3
+       mysql: mysql
+    tasks:
+      - name: Install packages
+        yum: name={{ package.apache }} state=present
+        ignore_errors: True
+        - name: Install packages
+        yum: name={{ package.shell }} state=present
+        ignore_errors: True
+        - name: Install packages
+        yum: name={{ package.ntp }} state=present
+        ignore_errors: True

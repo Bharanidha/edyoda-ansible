@@ -1,0 +1,106 @@
+---
+
+- name: Check operating system support
+  when: 
+    not (ansible_os_family == "RedHat" and ansible_lsb.major_release == "7") 
+  fail:
+    msg: "Role not supported or validated for this operation system version"
+
+- name: Install syslog package on CentOS
+  yum:
+    pkg: "rsyslog"
+    state: present
+
+- name: Copy rsyslog default config file
+  copy:
+    src: rsyslog.conf
+    dest: /etc/rsyslog.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify:
+    - Restart rsyslog
+
+- name: Copy rsyslog custom config file
+  copy:
+    src: syslog.conf
+    dest: /etc/rsyslog.d/vip-syslog.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  notify:
+    - Restart rsyslog
+
+- name: Increase max opened files value
+  lineinfile:
+    dest: /usr/lib/systemd/system/rsyslog.service
+    regexp: "^LimitNOFILE="
+    line: LimitNOFILE={{ max_open_files }} 
+    state: present
+    insertafter: "[Service]"
+    backup: yes
+  notify:
+    - Reload daemon
+    - Restart rsyslog
+
+
+- name: Create groups
+  group:
+    name: splunk
+    gid: 600
+    system: yes
+    state: present
+
+- name: Create users
+  user:
+    name: splunk
+    uid: 600
+    system: yes
+    move_home: yes
+    home: /opt/splunk
+    group: splunk
+    shell: /bin/bash
+    state: present
+
+- name: Copy script to clean the logs
+  copy:
+    src: clean_logs.sh
+    dest: /opt/clean_logs.sh
+    owner: root
+    group: splunk
+    mode: 0750
+    backup: yes
+
+- name: Start syslog service
+  service: 
+    name: rsyslog
+    state: started
+    enabled: yes
+
+- name: Create ~/.ssh/ for splunk user
+  file:
+    path: /opt/splunk/.ssh
+    state: directory
+    mode: 0700
+
+- name: Copy ssh key for splunk user
+  copy:
+    src: authorized_keys
+    dest: /opt/splunk/.ssh/authorized_keys
+    owner: splunk
+    group: splunk
+    mode: 0600
+
+- name: Verify cron service is started
+  service:
+    name: "crond"
+    state: started
+
+- name: edit crontab for cleaning logs in /data/, run every 4h
+  cron:
+    name: clean logs in /data/
+    minute: "0"
+    hour: "*/4"
+    job: /opt/clean_logs.sh

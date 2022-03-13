@@ -1,0 +1,15 @@
+# Extra vars
+---
+  - hosts: all
+    remote_user: vagrant
+    become: true
+    gather_facts: no
+    ignore_errors: yes
+    tasks: 
+      - name: Install {{ package }}
+        yum: name={{ package }}  state=present
+      - name: Enable {{ service }}
+        service: name={{ service }} enabled=yes
+      - name: Start {{ service }}
+        service: name={{ service }} state=started
+

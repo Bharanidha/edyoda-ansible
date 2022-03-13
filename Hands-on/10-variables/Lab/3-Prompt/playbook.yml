@@ -1,0 +1,19 @@
+# vars_prompt
+---
+  - hosts: all
+    remote_user: vagrant
+    become: true
+    gather_facts: no
+    ignore_errors: yes
+    vars_prompt:
+      - name: Package
+        prompt: "Which package need to be installed in remote machines?"
+        private: yes
+      - name: Service
+        prompt: "Which service need to be restarted in remote machines?"
+        private: no
+    tasks:
+      - name: Install {{ Package }}
+        yum: name={{ Package }}  state=present
+      - name: Start {{ Service }}
+        service: name={{ Service }} state=started

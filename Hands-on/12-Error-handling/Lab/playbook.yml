@@ -1,0 +1,16 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  gather_facts: yes
+  ignore_errors: yes
+  tasks:
+   - block:
+      - command: "ls /home/localadmin/apache8"
+        register: apache8_files
+     rescue:
+      - debug:
+         msg: "The given path is not valid"
+     always:
+       - debug:
+          msg: "This stage will run always irrespective of any failure“

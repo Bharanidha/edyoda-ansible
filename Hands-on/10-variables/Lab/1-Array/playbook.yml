@@ -1,0 +1,33 @@
+# Array
+---
+  - hosts: all
+    remote_user: vagrant
+    become: true
+    gather_facts: no
+    ignore_errors: yes
+    vars:
+      package:
+       - httpd
+       - ntp
+      service:
+       - httpd
+       - ntpd
+    tasks:
+      - name: Install apache
+        yum:
+         name: "{{ package[0] }}"
+         state: present
+      - name: Install ntp
+        yum:
+          name: "{{ package[1] }}"
+          state: present
+      - name: restart services
+        service:
+          name: "{{ service[0] }}"
+          state: restarted
+      - name: restart services
+        service:
+            name: "{{ service[1] }}"
+            state: restarted
+  
+
