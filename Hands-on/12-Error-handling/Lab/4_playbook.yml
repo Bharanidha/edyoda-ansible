@@ -1,0 +1,20 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  gather_facts: yes
+  ignore_errors: yes
+  tasks:
+   - name: download file
+     block:
+      - name: file download
+        get_url:
+         url: http://<url>
+         dest: /tmp
+      - name: Print results
+        debug: 
+         msg: "File downloaded"
+     rescue:
+      - name: Print error
+        debug: 
+         msg: "<url> appears to be down. Try again later."

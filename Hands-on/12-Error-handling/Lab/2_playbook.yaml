@@ -1,0 +1,16 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  gather_facts: yes
+  ignore_errors: yes
+  tasks:
+   - name: list files
+     block:
+      - name: list file
+        command: "ls /home/localadmin/apache8"
+        register: result
+      - name: Print results
+        debug: 
+          var=apache7_files.stdout_lines
+     failed_when: "'FAILED' in result.stderr"

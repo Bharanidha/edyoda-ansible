@@ -1,0 +1,14 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  gather_facts: yes
+  ignore_errors: yes
+  tasks:
+   - name: list files
+     block:
+      - command: "ls /home/localadmin/apache8"
+        register: apache8_files
+      - debug: 
+        var=apache7_files.stdout_lines
+     ignore_errors: yes
