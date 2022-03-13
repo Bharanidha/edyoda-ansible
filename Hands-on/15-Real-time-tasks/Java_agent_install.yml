@@ -1,0 +1,43 @@
+---
+ - hosts: dev
+   gather_facts: no
+   check_mode: no
+   ignore_errors: true
+   tasks:
+    - name: APPD Agent install when Java available
+      block:
+        - name: Check if Java is available in target host
+          shell: java -version
+          register: version
+        - name: Create directory
+          file: path=/opt/appd state=directory
+          #when: "version.rc == 0"
+        - name: Install unzip 
+          yum: name=unzip state=present
+          #when: "version.rc == 0"
+        - name: Copy & UNZIP APPD file in target machines
+          unarchive: src=/data/AppServerAgent-1.8-20.11.0.31438.zip dest=/opt/appd
+          #when: "version.rc == 0"
+        - name: Install appd agent
+          shell: /opt/appd/extensions/NetVizExtension/agent/install.sh
+          #when: "version.rc == 0"
+      tags: agent_install
+      when: "version.rc == 0"
+
+    - name: Configuration file modifications
+      block: 
+        - name: Modify agent name in properties file
+          lineinfile: path=/opt/appd/monitors/analytics-agent/conf/analytics-agent.properties regexp='ad.agent.name' line=ad.agent.name=test_agent
+        - name: Modify contorller url in properties file
+          lineinfile: path=/opt/appd/monitors/analytics-agent/conf/analytics-agent.properties regexp='ad.controller.url' line=ad.controller.url=https://wipro-nfr2.saas.appdynamics.com:443 
+        - name: Modify access key in properties file
+          lineinfile: path=/opt/appd/monitors/analytics-agent/conf/analytics-agent.properties regexp='http.event.accessKey' line=http.event.accessKey=zp37g60cj2yi
+        - name: Modify controller file
+          lineinfile: path=/opt/appd/conf/controller-info.xml regexp='<unique-host-id>' line=<unique-host-id>172.19.0.3</unique-host-id>
+      tags: file_modify 
+      
+    - name: APPD service start
+      block:
+        - name: start service
+          shell: /opt/appd/bin/machine-agent -d -p /opt/appd/bin/machine-agent/pidfile -Dappdynamics.https.proxyHost=https://wipro-nfr2.saas.appdynamics.com -Dappdynamics.https.proxyPort=443
+      tags: service_start

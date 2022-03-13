@@ -1,0 +1,16 @@
+---
+group:
+ - oinstall
+ - dba
+ - oper
+ - backupdba
+ - dgdba
+ - kmdba
+ - asmdba
+ - asmoper
+ - asmadmin
+user:
+ - oinstall
+ - dba
+ - oper
+ - oracle
